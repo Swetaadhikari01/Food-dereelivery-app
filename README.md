@@ -1,4 +1,4 @@
-Food Delivery App
+## Food Delivery App
 
 This is a Full-Stack MERN (MongoDB, Express, React, Node.js) food delivery application that connects users and food partners.
 It allows users to explore food items visually (through reels), save favorites, and manage their profiles — while food partners can upload their food items and promote them via short video “reels.
