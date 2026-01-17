@@ -2,6 +2,7 @@ import React, { useState, useEffect, use } from 'react'
 import '../../styles/profile.css'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
+import api from "../../api/axios";
 
 const Profile = () => {
   const { id } = useParams()
@@ -9,7 +10,7 @@ const Profile = () => {
   const [videos, setVideos] = useState([])
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/api/food-partner/${id}`, { withCredentials: true })
+    api.get(`/api/food-partner/${id}`, { withCredentials: true })
       .then(response => {
         setProfile(response.data.foodPartner)
         setVideos(response.data.foodPartner.foodItems)
