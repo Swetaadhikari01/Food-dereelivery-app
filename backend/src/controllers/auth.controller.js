@@ -64,7 +64,13 @@ async function loginUser(req, res) {
     id: user._id,
   }, process.env.JWT_SECRET)
 
-  res.cookie("token", token, { httpOnly: true });
+ res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,          // REQUIRED for HTTPS
+  sameSite: "none",      // REQUIRED for cross-domain
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
 
   res.status(200).json({
     success: true,
@@ -114,7 +120,13 @@ async function registerFoodPartner(req, res) {
     id: foodPartner._id
   }, process.env.JWT_SECRET)
 
-  res.cookie("token", token, { httpOnly: true });
+  res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,          // REQUIRED for HTTPS
+  sameSite: "none",      // REQUIRED for cross-domain
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
 
   res.status(201).json({
     message: "food partner registered successfully",
@@ -146,7 +158,13 @@ async function loginFoodPartner(req, res) {
     id: foodPartner._id,
   }, process.env.JWT_SECRET)
 
-  res.cookie("token", token, { httpOnly: true });
+ res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,          // REQUIRED for HTTPS
+  sameSite: "none",      // REQUIRED for cross-domain
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
 
   res.status(200).json({
     success: true,
