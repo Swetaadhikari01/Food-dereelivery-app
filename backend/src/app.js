@@ -1,19 +1,8 @@
 
-// app.js (Production-safe)
-
-const express = require("express");
-const cookieParser = require("cookie-parser");
-
-
-const authRoutes = require("./routes/auth.routes");
-const foodRoutes = require("./routes/food.routes");
-const foodPartnerRoutes = require("./routes/food-partner.routes");
-
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
-
 
 // ROUTES
 const authRoutes = require("./routes/auth.routes");
@@ -60,15 +49,14 @@ app.use((req, res, next) => {
 
 
 /* -------------------- MIDDLEWARE -------------------- */
-
 /* ================================
    MIDDLEWARES
 ================================ */
 app.use(
-   cors({
-      origin: "http://localhost:5173", // frontend URL
-      credentials: true,
-   })
+  cors({
+    origin: "http://localhost:5173", // frontend URL
+    credentials: true,
+  })
 );
 
 
@@ -78,7 +66,6 @@ app.use(express.urlencoded({ extended: true }));
 
 
 /* -------------------- ROUTES -------------------- */
-
 
 
 /* ================================
@@ -109,7 +96,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-   
 
 
 /* ================================
