@@ -70,7 +70,7 @@ app.use(
       credentials: true,
    })
 );
->>>>>>> dcf3948 (updates)
+
 
 app.use(cookieParser());
 app.use(express.json());
@@ -91,7 +91,7 @@ app.use("/uploads", express.static("uploads"));
    TEST ROUTE
 ================================ */
 app.get("/", (req, res) => {
-<<<<<<< HEAD
+
   res.status(200).send("Hello World");
 });
 
@@ -109,7 +109,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-   res.send("Food Delivery Backend Running 🚀");
+   
 
 
 /* ================================
