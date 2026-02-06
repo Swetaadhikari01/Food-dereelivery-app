@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 // app.js (Production-safe)
 
 const express = require("express");
@@ -8,12 +8,12 @@ const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
 const foodRoutes = require("./routes/food.routes");
 const foodPartnerRoutes = require("./routes/food-partner.routes");
-=======
+
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
->>>>>>> dcf3948 (updates)
+
 
 // ROUTES
 const authRoutes = require("./routes/auth.routes");
@@ -25,7 +25,7 @@ const cartRoutes = require("./routes/cart.routes"); // ✅ ADD CART ROUTE
 // CREATE APP FIRST
 const app = express();
 
-<<<<<<< HEAD
+
 /* -------------------- CORS CONFIG -------------------- */
 
 const allowedOrigins = [
@@ -60,7 +60,7 @@ app.use((req, res, next) => {
 
 
 /* -------------------- MIDDLEWARE -------------------- */
-=======
+
 /* ================================
    MIDDLEWARES
 ================================ */
@@ -75,11 +75,11 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-<<<<<<< HEAD
+
 
 /* -------------------- ROUTES -------------------- */
-=======
->>>>>>> dcf3948 (updates)
+
+
 
 /* ================================
    STATIC FILES (IMAGES & VIDEOS)
@@ -108,9 +108,9 @@ app.use((err, req, res, next) => {
     message: err.message || "Internal Server Error",
   });
 });
-=======
+
    res.send("Food Delivery Backend Running 🚀");
-});
+
 
 /* ================================
    API ROUTES
@@ -120,6 +120,6 @@ app.use("/api/food", foodRoutes);
 app.use("/api/food-partner", foodPartnerRoutes);
 app.use("/api/cart", cartRoutes);     // ✅ CART API
 app.use("/api/orders", ordersRoutes); // ✅ ORDER API
->>>>>>> dcf3948 (updates)
+
 
 module.exports = app;
