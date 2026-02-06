@@ -1,0 +1,57 @@
+.orders-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.orders-page h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.orders-list {
+  display: grid;
+  gap: 20px;
+}
+
+.order-card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.order-info h3 {
+  margin: 0 0 10px 0;
+}
+
+.order-info p {
+  margin: 4px 0;
+}
+
+.pending {
+  color: #e23744;
+  font-weight: bold;
+}
+
+.delivered {
+  color: green;
+  font-weight: bold;
+}
+
+.btn-primary {
+  background: #e23744;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #c72a38;
+}

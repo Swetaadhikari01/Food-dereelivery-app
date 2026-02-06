@@ -143,20 +143,25 @@ async function registerFoodPartner(req, res) {
 
 async function loginFoodPartner(req, res) {
   const { email, password } = req.body;
-  const foodPartner = await foodPartnerModel.findOne({ email });
 
+  const foodPartner = await foodPartnerModel.findOne({ email });
   if (!foodPartner) {
-    return res.status(400).json({ message: "Invalid email or password" })
+    return res.status(400).json({ message: "Invalid email or password" });
   }
 
   const isPasswordMatched = await bcrypt.compare(password, foodPartner.password);
-
   if (!isPasswordMatched) {
-    return res.status(400).json({ message: "Invalid email or password" })
+    return res.status(400).json({ message: "Invalid email or password" });
   }
-  const token = jwt.sign({
-    id: foodPartner._id,
-  }, process.env.JWT_SECRET)
+
+  // ✅ ADD ROLE IN TOKEN
+  const token = jwt.sign(
+    {
+      id: foodPartner._id,
+      role: "foodPartner"
+    },
+    process.env.JWT_SECRET
+  );
 
  res.cookie("token", token, {
   httpOnly: true,
@@ -172,9 +177,9 @@ async function loginFoodPartner(req, res) {
     foodPartner: {
       id: foodPartner._id,
       name: foodPartner.name,
-      email: foodPartner.email
+      role: "foodPartner"
     }
-  })
+  });
 }
 
 async function logoutFoodPartner(req, res) {

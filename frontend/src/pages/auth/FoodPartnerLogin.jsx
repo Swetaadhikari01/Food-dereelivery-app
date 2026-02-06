@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../styles/auth-shared.css';
-import axios from 'axios';
+//import axios from 'axios';
 import api from "../../api/axios";
 import { useNavigate } from 'react-router-dom';
 
@@ -11,19 +11,31 @@ const FoodPartnerLogin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const email = e.target.email.value;
-        const password = e.target.password.value;
+        try {
+            const email = e.target.email.value;
+            const password = e.target.password.value;
 
-        const response = await api.post("/api/auth/food-partner/login", {
-            email,
-            password
-        }, { withCredentials: true });
+            const res = await api.post(
+                "/api/auth/food-partner/login",
+                { email, password },
+                { withCredentials: true }
+            );
 
-        console.log(response.data);
+            console.log("Login Response:", res.data);
 
-        navigate("/create-food"); // Redirect to create food page after login
+            // ✅ Check foodPartner object (not user)
+            if (res.data.foodPartner && res.data.foodPartner.role === "foodPartner") {
+                const partnerId = res.data.foodPartner.id; // backend sends 'id'
+                navigate(`/foodpartner/profile/${partnerId}`);
+            } else {
+                navigate("/");
+            }
 
+        } catch (error) {
+            console.error("Login error:", error.response?.data || error.message);
+        }
     };
+
 
     return (
         <div className="auth-page-wrapper">

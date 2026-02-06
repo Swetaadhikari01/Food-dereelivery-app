@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import axios from 'axios';
 import api from "../../api/axios";
 import '../../styles/create-food.css';
 import { useNavigate } from 'react-router-dom';
@@ -7,12 +6,18 @@ import { useNavigate } from 'react-router-dom';
 const CreateFood = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
   const [videoFile, setVideoFile] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const [videoURL, setVideoURL] = useState('');
+  const [imageURL, setImageURL] = useState('');
   const [fileError, setFileError] = useState('');
-  const fileInputRef = useRef(null);
 
+  const fileInputRefVideo = useRef(null);
+  const fileInputRefImage = useRef(null);
   const navigate = useNavigate();
+
+  /* ================= PREVIEWS ================= */
 
   useEffect(() => {
     if (!videoFile) {
@@ -24,143 +29,186 @@ const CreateFood = () => {
     return () => URL.revokeObjectURL(url);
   }, [videoFile]);
 
-  const onFileChange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) { setVideoFile(null); setFileError(''); return; }
-    if (!file.type.startsWith('video/')) { setFileError('Please select a valid video file.'); return; }
+  useEffect(() => {
+    if (!imageFile) {
+      setImageURL('');
+      return;
+    }
+    const url = URL.createObjectURL(imageFile);
+    setImageURL(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
+
+  /* ================= FILE HANDLERS ================= */
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      setFileError('Please select a valid video file');
+      return;
+    }
+
+    // 🔥 Reel = video only
+    setImageFile(null);
+    setImageURL('');
     setFileError('');
     setVideoFile(file);
   };
 
-  const onDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const file = e.dataTransfer?.files?.[0];
-    if (!file) { return; }
-    if (!file.type.startsWith('video/')) { setFileError('Please drop a valid video file.'); return; }
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setFileError('Please select a valid image file');
+      return;
+    }
+
+    // 🔥 Food item = image only
+    setVideoFile(null);
+    setVideoURL('');
     setFileError('');
-    setVideoFile(file);
+    setImageFile(file);
   };
 
-  const onDragOver = (e) => {
-    e.preventDefault();
-  };
+  const openVideoDialog = () => fileInputRefVideo.current?.click();
+  const openImageDialog = () => fileInputRefImage.current?.click();
 
-  const openFileDialog = () => fileInputRef.current?.click();
+  /* ================= SUBMIT ================= */
 
   const onSubmit = async (e) => {
     e.preventDefault();
 
+    if (!price || isNaN(price)) {
+      alert("Enter valid price");
+      return;
+    }
+
+    if (!videoFile && !imageFile) {
+      alert("Upload either a video or an image");
+      return;
+    }
+
     const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("price", price);
 
-    formData.append('name', name);
-    formData.append('description', description);
-    formData.append("mama", videoFile);
+    if (videoFile) formData.append("video", videoFile);
+    if (imageFile) formData.append("image", imageFile);
 
-    const response = await api.post("/api/food", formData, {
-      withCredentials: true,
-    })
+    try {
+      const res = await api.post("/api/food", formData, { withCredentials: true });
 
-    console.log(response.data);
-    navigate("/home"); // Redirect to home or another page after successful creation
-    // Optionally reset
-    // setName(''); setDescription(''); setVideoFile(null);
+      // foodPartner id comes from backend response
+      const partnerId = res.data.food.foodPartner;
+
+      navigate(`/profile/${partnerId}`);
+
+
+      alert("Food added successfully 🍔");
+      navigate(`/profile/${partnerId}`);
+
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Error creating food");
+    }
   };
 
-  const isDisabled = useMemo(() => !name.trim() || !videoFile, [name, videoFile]);
+  const isDisabled = useMemo(
+    () => !name.trim() || !price || (!videoFile && !imageFile),
+    [name, price, videoFile, imageFile]
+  );
+
+  /* ================= UI ================= */
 
   return (
     <div className="create-food-page">
       <div className="create-food-card">
         <header className="create-food-header">
           <h1 className="create-food-title">Create Food</h1>
-          <p className="create-food-subtitle">Upload a short video, give it a name, and add a description.</p>
         </header>
 
         <form className="create-food-form" onSubmit={onSubmit}>
+
+          {/* VIDEO (REEL) */}
           <div className="field-group">
-            <label htmlFor="foodVideo">Food Video</label>
+            <label>Food Reel (Video)</label>
             <input
-              id="foodVideo"
-              ref={fileInputRef}
-              className="file-input-hidden"
               type="file"
+              ref={fileInputRefVideo}
               accept="video/*"
-              onChange={onFileChange}
+              hidden
+              onChange={handleVideoChange}
             />
+            <button type="button" onClick={openVideoDialog}>
+              Upload Video
+            </button>
 
-            <div
-              className="file-dropzone"
-              role="button"
-              tabIndex={0}
-              onClick={openFileDialog}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFileDialog(); } }}
-              onDrop={onDrop}
-              onDragOver={onDragOver}
-            >
-              <div className="file-dropzone-inner">
-                <svg className="file-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path d="M10.8 3.2a1 1 0 0 1 .4-.08h1.6a1 1 0 0 1 1 1v1.6h1.6a1 1 0 0 1 1 1v1.6h1.6a1 1 0 0 1 1 1v7.2a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6.4a1 1 0 0 1 1-1h1.6V3.2a1 1 0 0 1 1-1h1.6a1 1 0 0 1 .6.2z" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M9 12.75v-1.5c0-.62.67-1 1.2-.68l4.24 2.45c.53.3.53 1.05 0 1.35L10.2 16.82c-.53.31-1.2-.06-1.2-.68v-1.5" fill="currentColor" />
-                </svg>
-                <div className="file-dropzone-text">
-                  <strong>Tap to upload</strong> or drag and drop
-                </div>
-                <div className="file-hint">MP4, WebM, MOV • Up to ~100MB</div>
-              </div>
-            </div>
-
-            {fileError && <p className="error-text" role="alert">{fileError}</p>}
-
-            {videoFile && (
-              <div className="file-chip" aria-live="polite">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                  <path d="M9 12.75v-1.5c0-.62.67-1 1.2-.68l4.24 2.45c.53.3.53 1.05 0 1.35L10.2 16.82c-.53.31-1.2-.06-1.2-.68v-1.5" />
-                </svg>
-                <span className="file-chip-name">{videoFile.name}</span>
-                <span className="file-chip-size">{(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>
-                <div className="file-chip-actions">
-                  <button type="button" className="btn-ghost" onClick={openFileDialog}>Change</button>
-                  <button type="button" className="btn-ghost danger" onClick={() => { setVideoFile(null); setFileError(''); }}>Remove</button>
-                </div>
-              </div>
+            {videoURL && (
+              <video
+                src={videoURL}
+                controls
+                muted
+                playsInline
+                style={{ width: "100%", marginTop: "8px" }}
+              />
             )}
           </div>
 
-          {videoURL && (
-            <div className="video-preview">
-              <video className="video-preview-el" src={videoURL} controls playsInline preload="metadata" />
-            </div>
-          )}
+          {/* IMAGE (FOOD ITEM) */}
+          <div className="field-group">
+            <label>Food Image</label>
+            <input
+              type="file"
+              ref={fileInputRefImage}
+              accept="image/*"
+              hidden
+              onChange={handleImageChange}
+            />
+            <button type="button" onClick={openImageDialog}>
+              Upload Image
+            </button>
+
+            {imageURL && (
+              <img
+                src={imageURL}
+                alt="Preview"
+                style={{
+                  width: "100%",
+                  maxHeight: "200px",
+                  objectFit: "cover",
+                  marginTop: "8px"
+                }}
+              />
+            )}
+          </div>
+
+          {fileError && <p style={{ color: "red" }}>{fileError}</p>}
 
           <div className="field-group">
-            <label htmlFor="foodName">Name</label>
-            <input
-              id="foodName"
-              type="text"
-              placeholder="e.g., Spicy Paneer Wrap"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            <label>Name</label>
+            <input value={name} onChange={e => setName(e.target.value)} required />
           </div>
 
           <div className="field-group">
-            <label htmlFor="foodDesc">Description</label>
-            <textarea
-              id="foodDesc"
-              rows={4}
-              placeholder="Write a short description: ingredients, taste, spice level, etc."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <label>Description</label>
+            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} />
+          </div>
+
+          <div className="field-group">
+            <label>Price (₹)</label>
+            <input type="number" value={price} onChange={e => setPrice(e.target.value)} required />
           </div>
 
           <div className="form-actions">
-            <button className="btn-primary" type="submit" disabled={isDisabled}>
+            <button type="submit" className="btn-primary" disabled={isDisabled}>
               Save Food
             </button>
           </div>
+
         </form>
       </div>
     </div>

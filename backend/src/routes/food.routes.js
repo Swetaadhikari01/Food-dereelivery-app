@@ -1,44 +1,68 @@
-const express = require('express');
-const foodController = require("../controllers/food.controller")
-const authMiddleware = require("../middlewares/auth.middleware")
+// backend/src/routes/food.routes.js
+
+const express = require("express");
+const multer = require("multer");
+const foodController = require("../controllers/food.controller");
+const { isAuthenticated } = require("../middlewares/auth.middleware");
+const foodPartnerAuth = require("../middlewares/foodPartnerAuth");
+
 const router = express.Router();
-const multer = require('multer');
 
+// Multer config (video + image)
+const upload = multer({ storage: multer.memoryStorage() });
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-})
+/* ============================
+   CREATE FOOD (FOOD PARTNER ONLY)
+   ============================ */
+router.post(
+  "/",
+  foodPartnerAuth,   // ⭐ ONLY FOOD PARTNER
+  upload.fields([
+    { name: "video", maxCount: 1 },
+    { name: "image", maxCount: 1 }
+  ]),
+  foodController.createFood
+);
 
+/* ============================
+   DELETE FOOD (OWNER ONLY)
+   ============================ */
+router.delete(
+  "/:id",
+  foodPartnerAuth,   // ⭐ ensures req.foodPartner exists
+  foodController.deleteFood
+);
 
-/* POST /api/food/ [protected]*/
-router.post('/',
-  authMiddleware.authFoodPartnerMiddleware,
-  upload.single("mama"),
-  foodController.createFood)
+/* ============================
+   GET ALL FOOD (PUBLIC)
+   ============================ */
+router.get("/", foodController.getFoodItems);
 
+/* ============================
+   LIKE FOOD (USER ONLY)
+   ============================ */
+router.post(
+  "/like",
+  isAuthenticated,
+  foodController.likeFood
+);
 
-/* GET /api/food/ [protected] */
-router.get("/",
-  authMiddleware.authUserMiddleware,
-  foodController.getFoodItems)
-
-
-router.post('/like',
-  authMiddleware.authUserMiddleware,
-  foodController.likeFood)
-
-
-router.post('/save',
-  authMiddleware.authUserMiddleware,
+/* ============================
+   SAVE FOOD (USER ONLY)
+   ============================ */
+router.post(
+  "/save",
+  isAuthenticated,
   foodController.saveFood
-)
+);
 
-
-router.get('/save',
-  authMiddleware.authUserMiddleware,
+/* ============================
+   GET SAVED FOOD (USER ONLY)
+   ============================ */
+router.get(
+  "/save",
+  isAuthenticated,
   foodController.getSaveFood
-)
+);
 
-
-
-module.exports = router
+module.exports = router;

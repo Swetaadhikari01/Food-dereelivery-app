@@ -1,48 +1,46 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios';
 import api from "../../api/axios";
 import '../../styles/reels.css'
 import ReelFeed from '../../components/ReelFeed'
 
 const Home = () => {
   const [videos, setVideos] = useState([])
-  // Autoplay behavior is handled inside ReelFeed
 
   useEffect(() => {
     api.get("/api/food", { withCredentials: true })
       .then(response => {
 
-        console.log(response.data);
+        console.log("Foods from API:", response.data.foods);
 
-        setVideos(response.data.foodItems)
+        // ✅ Backend already formatted video/image URLs
+        setVideos(response.data.foods || []);
+
       })
-      .catch(() => { /* noop: optionally handle error */ })
+      .catch((err) => {
+        console.log("Error loading reels", err);
+        setVideos([]);
+      })
   }, [])
 
-  // Using local refs within ReelFeed; keeping map here for dependency parity if needed
 
   async function likeVideo(item) {
+    await api.post("/api/food/like", { foodId: item._id }, { withCredentials: true })
 
-    const response = await api.post("/api/food/like", { foodId: item._id }, { withCredentials: true })
-
-    if (response.data.like) {
-      console.log("Video liked");
-      setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, likeCount: v.likeCount + 1 } : v))
-    } else {
-      console.log("Video unliked");
-      setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, likeCount: v.likeCount - 1 } : v))
-    }
-
+    setVideos((prev) =>
+      prev.map((v) =>
+        v._id === item._id ? { ...v, likeCount: (v.likeCount || 0) + 1 } : v
+      )
+    )
   }
 
   async function saveVideo(item) {
-    const response = await api.post("/api/food/save", { foodId: item._id }, { withCredentials: true })
+    await api.post("/api/food/save", { foodId: item._id }, { withCredentials: true })
 
-    if (response.data.save) {
-      setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: v.savesCount + 1 } : v))
-    } else {
-      setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: v.savesCount - 1 } : v))
-    }
+    setVideos((prev) =>
+      prev.map((v) =>
+        v._id === item._id ? { ...v, savesCount: (v.savesCount || 0) + 1 } : v
+      )
+    )
   }
 
   return (
